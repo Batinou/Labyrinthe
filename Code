@@ -1,0 +1,300 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr  3 18:28:08 2021
+
+@author: Registered user
+"""
+
+from random import randint
+import time
+def tousegaux():  
+    #Cette fonction vérifie que toutes les cellules ont la même valeur
+    test=dic[(1,1)]#On prend la valeur de la première cellule
+    for i in dic:        
+        if dic[i]==0 or dic[i]==1:#on ignore les murs, l'entrée et la sortie
+            pass
+        elif i==(1,1):#on ignore la première cellule
+            pass
+        elif test != dic[i]:#On renvoie True dès qu'une valeur est différente
+            return True
+    return False#On revoie False si toutes les valeurs sont égales
+    
+def cvoisine(cell):
+    #On choisi une cellule voisine de celle choisi aléatoirement ainsi que le mur qui les séparent
+    cellx,celly=cell
+    orientation=randint(0,3)
+    if orientation==0:
+        mur=(cellx,celly-1)
+        voisin=(cellx,celly-2)
+    elif orientation==1:
+        mur=(cellx+1,celly)
+        voisin=(cellx+2,celly)
+    elif orientation==2:
+        mur=(cellx,celly+1)
+        voisin=(cellx,celly+2)
+    elif orientation==3:
+        mur=(cellx-1,celly)
+        voisin=(cellx-2,celly)
+    voix,voiy=voisin
+    
+    if voix<0 and voiy<0:#On renvoie (0,0) si la voisine est sur les bords du dictionnaire ou n'est pas dedans
+        return (0,0)    
+    elif voisin not in dic:
+        return  (0,0)
+    else:
+        return (voisin,mur)#Sinon on renvoie les coordonnées de la voisine et du mur
+    
+
+def fusion(cell):    
+    voisin,mur=cvoisine(cell)
+    #voisin et mur en dehors du dictionnaire
+    if voisin==0 and mur==0:
+        pass
+    #une cellule et sa voisine ne sont pas des murs, l'entrée et la sortie ne compte pas    
+    elif dic[voisin]==0 or dic[cell]==0 or dic[voisin]==1 or dic[cell]==1:
+        pass
+    #la cellule et sa voisine doivent avoir une valeur différente pour fusionner    
+    elif dic[voisin]==dic[cell]:
+        pass
+    else:
+        valeur=dic[voisin]
+        #la voisine prend la valeur de la cellule choisi
+        dic[voisin]=dic[cell]
+        #le mur entre la voisine et celle choisi prend la valeur choisi
+        dic[mur]=dic[cell]
+        #pour toutes les cases du laby
+        for i in dic:
+            #si la valeur de la case = la valeur originel de la voisine
+            if dic[i]==valeur:
+                #toutes les cellules = à la voisine prennent la valeur de celle choisi
+                dic[i]=dic[cell]
+        
+                
+def write_svg(nx,ny,filename):
+    #Pour dessiner le labyrinthe
+    aspect_ratio = nx / ny
+    padding = 10
+    height = 720
+    width = int(height * aspect_ratio)
+    scy, scx = height / ny, width / nx #taille des cases
+    with open(filename, 'w') as f:
+            # SVG préambule et styles.
+            print('<?xml version="1.0" encoding="utf-8"?>', file=f)
+            print('<svg xmlns="http://www.w3.org/2000/svg"', file=f)
+            print('    xmlns:xlink="http://www.w3.org/1999/xlink"', file=f)
+            print('    width="{:d}" height="{:d}" viewBox="{} {} {} {}">'.format(width + 2 * padding, height + 2 * padding,-padding, -padding, width + 2 * padding, height + 2 * padding),file=f)            
+            print('<defs>\n<style type="text/css"><![CDATA[',file=f)            
+            print(']]></style>\n</defs>', file=f)
+            for cle, val in dic.items():
+                clex,cley=cle
+                
+                if val==0:
+                    #murs en noir
+                    print('<rect x="{}" y="{}" width="{}" height="{}" style="fill:black"/>'.format(clex*scx,cley*scy,scx,scy),file=f)
+                elif val=="chemin":
+                    print('<rect x="{}" y="{}" width="{}" height="{}" style="fill:red"/>'.format(clex*scx,cley*scy,scx,scy),file=f)
+                
+                elif val<=-1:
+                    #chemin resolu en vert
+                    print('<rect x="{}" y="{}" width="{}" height="{}" style="fill:green"/>'.format(clex*scx,cley*scy,scx,scy),file=f)                
+                                
+                else:
+                    #cellules en blanc
+                    print('<rect x="{}" y="{}" width="{}" height="{}" style="fill:white"/>'.format(clex*scx,cley*scy,scx,scy),file=f)
+            #fin modif svg
+            print('</svg>', file=f)
+
+def valvoisin(liste,cases,etape):
+    possible=[]
+    for i in liste:
+        if i not in cases:
+            pass
+        else:
+            cellx,celly=i
+            celln=cellx,celly-1
+            celle=cellx+1,celly
+            cells=cellx,celly+1
+            cello=cellx-1,celly
+            if celln not in dic or dic[celln]==0 or celln not in cases:
+                pass
+            else:
+                possible.append(celln)
+                dic[celln]=etape
+            if celle not in dic or dic[celle]==0 or celle not in cases:
+                pass
+            else:
+                possible.append(celle)
+                dic[celle]=etape
+            if cells not in dic or dic[cells]==0 or cells not in cases:
+                pass
+            else:
+                possible.append(cells)
+                dic[cells]=etape
+            if cello not in dic or cello not in cases:
+                pass
+            elif dic[cello]==0:
+                pass
+            else:
+                possible.append(cello)
+                dic[cello]=etape
+            cases.remove(i)
+    return possible
+
+def resolution():   
+    #entree prend la valeur 1
+    etape=-1
+    dic[entree]=etape
+    avisite=[]
+    for i in dic:
+        if dic[i]==0:
+            pass
+        else:
+            avisite.append(i)
+    liste=valvoisin([entree],avisite,etape)
+    
+    while dic[sortie]==1:
+        
+        etape=etape-1
+        liste=valvoisin(liste,avisite,etape)
+    print("écoulement: fait")
+    chemin(etape)
+    dic[entree]="chemin"
+        
+
+
+def chemin(etape):
+    lv=casesvoisine(sortie)
+    cell=sortie
+    for i in lv:
+        if dic[i]==etape+1:
+            dic[sortie]="chemin"
+            etape+=1
+    while etape!=0:
+        lv=casesvoisine(cell)
+        for j in lv:
+            if dic[j]==etape:
+                dic[j]="chemin"
+                cell=j
+                etape+=1
+                
+            
+    
+        
+def casesvoisine(case):
+    voisinescases=[]
+    x,y=case
+    nord=(x,y-1)
+    ouest=(x-1,y)
+    sud=(x,y+1)
+    est=(x+1,y)
+    if nord in dic and dic[nord]!=0:
+        voisinescases.append(nord)
+    if ouest in dic and dic[ouest]!=0:
+        voisinescases.append(ouest)
+    if sud in dic and dic[sud]!=0:
+        voisinescases.append(sud)
+    if est in dic and dic[est]!=0:
+        voisinescases.append(est)
+    return voisinescases
+    
+    
+
+def trou(case):
+    if diff==0:
+        pass
+    else:
+        valeur=dic[1,1]
+        for i in range(case//(13-diff)):
+            x=randint(3,nx-3)
+            y=randint(3,ny-3)
+            if dic[x,y]==0:
+                seuldeux(x,y,valeur)
+            
+def seuldeux(x,y,valeur):
+    if dic[x-1,y]==0 and dic[x+1,y]==0 and dic[x,y-1]!=0 and dic[x,y+1]!=0:
+        dic[x,y]=valeur
+    elif dic[x-1,y]!=0 and dic[x+1,y]!=0 and dic[x,y-1]==0 and dic[x,y+1]==0:
+        dic[x,y]=valeur
+
+
+test={}
+dic = {}#On crée le dictionnaire qui contiendra les coordonnées et leur valeur
+print("Veillez entrer une longueur et une largeur supérieur à 5 cases ainsi qu'une complexité entre 0 et 10 (0: un seul chemin, 10 de plus en plus de chemins).")
+nx=int(input("Longueur du labyrinthe? "))
+ny=int(input("Hauteur du labyrinthe? "))
+diff=int(input("Complexitédu labyrinthe? "))
+while nx<5:
+    nx=int(input("Veillez entrer une longueur supérieur à 5: "))
+while ny<5:
+    ny=int(input("Veillez entrer une largeur supérieur à 5: "))
+while diff<0 or diff>10:
+    diff=int(input("Veillez entrer une difficulté comprise entre 0 et 10: "))
+t1=time.time()
+# Grille de largeur nx et de hauteur ny
+
+nb=1
+
+#pas de longueur et hauteur paires
+if nx%2==0:
+    nx=nx+1
+if ny%2==0:
+    ny=ny+1
+    
+for x in range(0,nx):#Pour chaque valeur sur la longueur
+    for y in range(0,ny):#Pour chaque valeur sur la hauteur
+        
+        if x % 2 == 0 or y % 2 == 0: # Première colonne, premère ligne, puis toutes les 2 colonnes/lignes
+            dic[(x,y)] = 0 # 0 = mur
+
+        else :
+            nb=nb+1
+            dic[(x,y)] = nb #à chaque cellule sa valeur
+            
+#On crée les coordonnées de l'entrée et la sortie
+cote=randint(1,2)
+if cote==1:
+    nord=randint(1,nx-2)
+    while nord%2==0:
+        nord=randint(1,nx-2)
+    sud=randint(1,nx-2)
+    while sud%2==0:
+        sud=randint(1,nx-2)
+    entree=(nord,0)
+    sortie=(sud,ny-1)
+elif cote==2:
+    ouest=randint(1,ny-2)
+    while ouest%2==0:
+        ouest=randint(1,ny-2)
+    est=randint(1,ny-2)
+    while est%2==0:
+        est=randint(1,ny-2)
+    entree=(0,ouest)
+    sortie=(nx-1,est)
+    
+print(dic)    
+dic[entree] = 1 # entrée du labyrinthe       
+dic[sortie] = 1 # sortie du labyrinthe
+print("Nombre de cases:",nb-1) #nombre de cellules originel
+
+while tousegaux():
+    x=0
+    y=0
+    while x%2==0 or y%2==0:
+        #On choisit une case qui n'est pas un mur au hasard
+        x=randint(1,nx-1)
+        y=randint(1,ny-1)
+    cell=(x,y)
+    fusion(cell)
+
+print("labyrinthe: fait")
+trou(nb-1)
+write_svg(nx, ny,'maze.svg')
+print("trou: fait")
+t2 = time.time()
+print("Création du labyrinthe en :",(t2-t1),"secondes.")
+resolution()
+write_svg(nx, ny,'chemin.svg')
+print('résolution: faite')
+t3 = time.time()
+print("Résolution du labyrinthe en :",(t3-t2),"secondes.")
+#modification de l'image svg
