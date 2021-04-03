@@ -141,9 +141,10 @@ def valvoisin(liste,cases,etape):
     return possible
 
 def resolution():   
-    #entree prend la valeur 1
+    #entree prend la valeur -1
     etape=-1
     dic[entree]=etape
+    #On crée une liste qui contiendra les cases à visiter
     avisite=[]
     for i in dic:
         if dic[i]==0:
@@ -181,6 +182,7 @@ def chemin(etape):
     
         
 def casesvoisine(case):
+    #On crée une liste qui contiendra toutes les voisines d'une case qui ne sont pas des murs
     voisinescases=[]
     x,y=case
     nord=(x,y-1)
@@ -200,9 +202,11 @@ def casesvoisine(case):
     
 
 def trou(case):
+    #Si la complexité est de 0, on passe
     if diff==0:
         pass
     else:
+        #Sinon on transforme un mur en cellule
         valeur=dic[1,1]
         for i in range(case//(13-diff)):
             x=randint(3,nx-3)
@@ -211,6 +215,7 @@ def trou(case):
                 seuldeux(x,y,valeur)
             
 def seuldeux(x,y,valeur):
+    #Si le mur a exactement deux voisins opposé qui sont des murs, on le transforme en cellule
     if dic[x-1,y]==0 and dic[x+1,y]==0 and dic[x,y-1]!=0 and dic[x,y+1]!=0:
         dic[x,y]=valeur
     elif dic[x-1,y]!=0 and dic[x+1,y]!=0 and dic[x,y-1]==0 and dic[x,y+1]==0:
@@ -284,17 +289,16 @@ while tousegaux():
         x=randint(1,nx-1)
         y=randint(1,ny-1)
     cell=(x,y)
-    fusion(cell)
+    fusion(cell)#On applique la fusion
 
 print("labyrinthe: fait")
-trou(nb-1)
+trou(nb-1)#On fait les trous
 write_svg(nx, ny,'maze.svg')
 print("trou: fait")
 t2 = time.time()
 print("Création du labyrinthe en :",(t2-t1),"secondes.")
-resolution()
-write_svg(nx, ny,'chemin.svg')
+resolution()#On résout le labyrinthe
+write_svg(nx, ny,'chemin.svg')#On transforme en image svg
 print('résolution: faite')
 t3 = time.time()
 print("Résolution du labyrinthe en :",(t3-t2),"secondes.")
-#modification de l'image svg
