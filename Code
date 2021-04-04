@@ -203,12 +203,12 @@ def casesvoisine(case):
 
 def trou(case):
     #Si la complexité est de 0, on passe
-    if diff==0:
+    if comp==0:
         pass
     else:
         #Sinon on transforme un mur en cellule
         valeur=dic[1,1]
-        for i in range(case//(13-diff)):
+        for i in range(case//(13-comp)):
             x=randint(3,nx-3)
             y=randint(3,ny-3)
             if dic[x,y]==0:
@@ -227,13 +227,13 @@ dic = {}#On crée le dictionnaire qui contiendra les coordonnées et leur valeur
 print("Veillez entrer une longueur et une largeur supérieur à 5 cases ainsi qu'une complexité entre 0 et 10 (0: un seul chemin, 10 de plus en plus de chemins).")
 nx=int(input("Longueur du labyrinthe? "))
 ny=int(input("Hauteur du labyrinthe? "))
-diff=int(input("Complexitédu labyrinthe? "))
+comp=int(input("Complexité du labyrinthe? "))
 while nx<5:
     nx=int(input("Veillez entrer une longueur supérieur à 5: "))
 while ny<5:
     ny=int(input("Veillez entrer une largeur supérieur à 5: "))
-while diff<0 or diff>10:
-    diff=int(input("Veillez entrer une difficulté comprise entre 0 et 10: "))
+while comp<0 or comp>10:
+    comp=int(input("Veillez entrer une difficulté comprise entre 0 et 10: "))
 t1=time.time()
 # Grille de largeur nx et de hauteur ny
 
